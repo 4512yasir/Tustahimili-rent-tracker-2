@@ -1,25 +1,28 @@
 import { useState } from "react";
+import { useUser } from "../context/usecontext";
+import { useLocation } from "wouter";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { toast, Toaster } from "react-hot-toast";
 import Footer from "./footer";
 
 type LoginFormData = {
   email: string;
   password: string;
+  role: "admin" | "agent" | "tenant";
 };
 
 export default function LoginPage() {
+  const { login } = useUser();
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
+    role: "tenant",
   });
-
   const [errors, setErrors] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -27,42 +30,31 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      setErrors("Please enter email and password.");
+    if (!formData.email || !formData.password || !formData.role) {
+      setErrors("Please fill in all fields.");
       return;
     }
 
+    // Dummy login success
+    login({ email: formData.email, role: formData.role });
     setErrors("");
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Login successful!");
-      console.log("Login data:", formData);
-      setFormData({ email: "", password: "" });
-    }, 1500);
+    setLocation("/dashboard"); // redirect to dashboard
   };
 
   const handleGoogleLogin = () => {
-    toast("Google login clicked!");
-    // Integrate actual Google OAuth here
+    login({ email: "googleuser@example.com", role: "tenant" }); // example
+    setLocation("/dashboard");
   };
 
   return (
     <>
-      <Toaster position="top-right" />
-      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-12">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-10 relative overflow-hidden transform hover:-translate-y-1 transition duration-500">
-          <h2 className="text-3xl font-bold text-blue-700 mb-6 text-center">
-            Welcome Back
-          </h2>
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100 px-4 py-12">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-10 relative overflow-hidden transform transition duration-700 animate-fadeScale">
+          <h2 className="text-3xl font-bold text-blue-700 mb-6 text-center">Login</h2>
 
-          {errors && (
-            <p className="text-red-500 mb-4 text-center font-medium">{errors}</p>
-          )}
+          {errors && <p className="text-red-500 mb-4 text-center font-medium">{errors}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
             <div className="relative">
               <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
               <input
@@ -75,7 +67,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Password */}
             <div className="relative">
               <FaLock className="absolute left-3 top-3 text-gray-400" />
               <input
@@ -95,28 +86,24 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Forgot Password */}
-            <div className="text-right">
-              <a
-                href="/forgot-password"
-                className="text-blue-600 text-sm hover:underline"
-              >
-                Forgot Password?
-              </a>
-            </div>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            >
+              <option value="admin">Admin</option>
+              <option value="agent">Agent</option>
+              <option value="tenant">Tenant</option>
+            </select>
 
-            {/* Login Button */}
             <button
               type="submit"
-              disabled={loading}
-              className={`w-full py-3 rounded-xl font-semibold text-white text-lg transition 
-              ${loading ? "bg-blue-300 cursor-not-allowed" : "bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500"}
-              `}
+              className="w-full py-3 rounded-xl font-semibold text-white text-lg bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 transition"
             >
-              {loading ? "Logging in..." : "Login"}
+              Login
             </button>
 
-            {/* Google Login */}
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -126,19 +113,8 @@ export default function LoginPage() {
               <span className="font-medium">Continue with Google</span>
             </button>
           </form>
-
-          <p className="text-gray-500 mt-6 text-center text-sm">
-            Don't have an account?{" "}
-            <a
-              href="/get-started"
-              className="text-blue-600 font-semibold hover:underline"
-            >
-              Register
-            </a>
-          </p>
         </div>
       </section>
-
       <Footer />
     </>
   );

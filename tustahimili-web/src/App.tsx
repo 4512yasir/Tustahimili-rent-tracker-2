@@ -1,48 +1,37 @@
+import React from "react";
 import { Router, Route } from "wouter";
-import { Toaster } from "react-hot-toast";
-
-import LandingPage from "./components/LandingPage";
-import AboutPage from "./components/AboutPage";
-import FeaturesPage from "./components/faeturepage";
-import RegisterPage from "./components/registerpage";
+import { UserProvider, useUser } from "./context/usecontext";
 import LoginPage from "./components/LoginPage";
+import RegisterPage from "./components/registerpage";
+import DashboardLayout from "./components/DashboardLayout";
+import LandingPage from "./components/LandingPage";
+
+// Protected route wrapper
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const { user } = useUser();
+  if (!user) {
+    window.location.href = "/login";
+    return null;
+  }
+  return children;
+}
 
 export default function App() {
   return (
-    <>
-      {/* 🔥 GLOBAL TOASTER (works for every page) */}
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            borderRadius: "10px",
-            padding: "12px 16px",
-            fontSize: "15px",
-          },
-        }}
-      />
-
+    <UserProvider>
       <Router>
-        <Route path="/">
-          <LandingPage />
-        </Route>
-
-        <Route path="/about">
-          <AboutPage />
-        </Route>
-
-        <Route path="/features">
-          <FeaturesPage />
-        </Route>
-
-        <Route path="/get-started">
-          <RegisterPage />
-        </Route>
-
-        <Route path="/login">
-          <LoginPage />
-        </Route>
+        <Route path="/" component={LandingPage} />
+        <Route path="/get-started" component={RegisterPage} />
+        <Route path="/login" component={LoginPage} />
+        <Route
+          path="/dashboard"
+          component={() => (
+            <ProtectedRoute>
+              <DashboardLayout role={useUser().user!.role} />
+            </ProtectedRoute>
+          )}
+        />
       </Router>
-    </>
+    </UserProvider>
   );
 }
