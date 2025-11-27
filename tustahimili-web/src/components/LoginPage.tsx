@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useUser } from "../context/usecontext";
+import { useUser } from "../context/useUser";
 import { useLocation } from "wouter";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import Footer from "./footer";
 
 type LoginFormData = {
+  name: string;
   email: string;
   password: string;
   role: "admin" | "agent" | "tenant";
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const { login } = useUser();
   const [, setLocation] = useLocation();
   const [formData, setFormData] = useState<LoginFormData>({
+    name: "",
     email: "",
     password: "",
     role: "tenant",
@@ -27,22 +29,24 @@ export default function LoginPage() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+ 
+const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password || !formData.role) {
+    if (!formData.name || !formData.email || !formData.password) {
       setErrors("Please fill in all fields.");
       return;
     }
 
-    // Dummy login success
-    login({ email: formData.email, role: formData.role });
-    setErrors("");
-    setLocation("/dashboard"); // redirect to dashboard
-  };
+    const user = { ...formData };
+    login(user);
 
+    // Redirect based on role
+    setLocation("/dashboard");
+    setErrors("");
+  };
   const handleGoogleLogin = () => {
-    login({ email: "googleuser@example.com", role: "tenant" }); // example
+    login({ name: "Google User", email: "googleuser@example.com", role: "tenant" });
     setLocation("/dashboard");
   };
 
@@ -55,6 +59,17 @@ export default function LoginPage() {
           {errors && <p className="text-red-500 mb-4 text-center font-medium">{errors}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="relative">
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+
             <div className="relative">
               <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
               <input
