@@ -2,6 +2,7 @@
 import { createContext } from "react";
 
 export type User = {
+  id: number;
   name: string;
   email: string;
   role: "admin" | "agent" | "tenant";

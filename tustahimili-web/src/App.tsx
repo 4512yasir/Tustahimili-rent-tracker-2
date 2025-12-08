@@ -1,105 +1,149 @@
 import { Router, Route } from "wouter";
-import { UserProvider } from "@/context/userProvider";
 import { useUser } from "@/context/useUser";
+import type { Role } from "./type";
 
+// Public Pages
 import LandingPage from "./components/LandingPage";
 import RegisterPage from "./components/registerpage";
 import LoginPage from "./components/LoginPage";
 import FeaturesPage from "./components/faeturepage";
 import AboutPage from "./components/AboutPage";
 
+// Layout & Auth
 import DashboardLayout from "./components/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Plot pages
+// Dashboard Pages
 import AdminPlots from "./plots/AdminPlot";
 import AgentPlots from "./plots/AgentPlot";
 import PlotPerformance from "./plots/PlotPerformance";
+import TenantPage from "./Tenants/TenantPage";
+import RentTracking from "./Rent/Renttracking";
+import RepairPage from "./Repair/RepairPage";
 
-// Wrapper so dashboard gets the logged-in user's role
-function DashboardWrapper() {
-  const { user } = useUser();
-  if (!user) return null;
+/* ---------------- DASHBOARD WRAPPERS ---------------- */
 
-  return <DashboardLayout role={user.role} />;
+interface DashboardWrapperProps {
+  content?: React.ReactNode;
 }
 
-// Wrapper for plots to render inside dashboard layout
-function PlotsWrapper() {
+
+
+/* ---------------- WRAPPERS ---------------- */
+
+const RepairWrapper: React.FC = () => {
+  const { user } = useUser();
+  if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={<RepairPage />} />;
+};
+
+const DashboardWrapper: React.FC<DashboardWrapperProps> = ({ content }) => {
+  const { user } = useUser();
+  if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={content} />;
+};
+
+const PlotsWrapper: React.FC = () => {
   const { user } = useUser();
   if (!user) return null;
 
   const content = user.role === "admin" ? <AdminPlots /> : <AgentPlots />;
+  return <DashboardLayout role={user.role as Role} content={content} />;
+};
 
-  return <DashboardLayout role={user.role} content={content} />;
-}
-
-// Wrapper for plot performance
-function PlotPerformanceWrapper({ params }: { params: { id: string } }) {
+const TenantsWrapper: React.FC = () => {
   const { user } = useUser();
   if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={<TenantPage />} />;
+};
 
-  return (
-    <DashboardLayout
-      role={user.role}
-      content={<PlotPerformance params={params} />}
-    />
-  );
-}
+const RentTrackingWrapper: React.FC = () => {
+  const { user } = useUser();
+  if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={<RentTracking />} />;
+};
 
-const dashboardRoutes = [
-  "/dashboard",
-  "/tenants",
-  "/rent-tracking",
-  "/repairs",
-  "/analytics",
-  "/security",
-];
+const PlotPerformanceWrapper: React.FC = () => {
+  const { user } = useUser();
+  if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={<PlotPerformance role={user.role as Role} />} />;
+};
+
+/* ---------------- ROUTES ---------------- */
 
 export default function App() {
   return (
-    <UserProvider>
-      <Router>
-        {/* Public Routes */}
-        <Route path="/" component={LandingPage} />
-        <Route path="/get-started" component={RegisterPage} />
-        <Route path="/features" component={FeaturesPage} />
-        <Route path="/about" component={AboutPage} />
-        <Route path="/login" component={LoginPage} />
+    <Router>
+      {/* ---------- PUBLIC ROUTES ---------- */}
+      <Route path="/" component={LandingPage} />
+      <Route path="/get-started" component={RegisterPage} />
+      <Route path="/features" component={FeaturesPage} />
+      <Route path="/about" component={AboutPage} />
+      <Route path="/login" component={LoginPage} />
 
-        {/* Dashboard Routes */}
-        {dashboardRoutes.map((path) => (
-          <Route
-            key={path}
-            path={path}
-            component={() => (
-              <ProtectedRoute>
-                <DashboardWrapper />
-              </ProtectedRoute>
-            )}
-          />
-        ))}
+      {/* ---------- DASHBOARD ROUTES ---------- */}
+      <Route
+        path="/dashboard"
+        component={() => (
+          <ProtectedRoute>
+            <DashboardWrapper />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/tenants"
+        component={() => (
+          <ProtectedRoute>
+            <TenantsWrapper />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/plots"
+        component={() => (
+          <ProtectedRoute>
+            <PlotsWrapper />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/plot/:id"
+        component={() => (
+          <ProtectedRoute>
+            <PlotPerformanceWrapper />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/rent-tracking"
+        component={() => (
+          <ProtectedRoute>
+            <RentTrackingWrapper />
+          </ProtectedRoute>
+        )}
+      />
 
-        {/* Plots */}
+       <Route
+        path="/repairs"
+        component={() => (
+          <ProtectedRoute>
+            <RepairWrapper />
+          </ProtectedRoute>
+        )}
+      />
+
+      {/* ---------- COMING SOON ---------- */}
+      {["/repairs", "/analytics", "/security"].map((path) => (
         <Route
-          path="/plots"
+          key={path}
+          path={path}
           component={() => (
             <ProtectedRoute>
-              <PlotsWrapper />
+              <DashboardWrapper />
             </ProtectedRoute>
           )}
         />
-
-        {/* Plot performance */}
-        <Route
-          path="/plot/:id"
-          component={({ params }) => (
-            <ProtectedRoute>
-              <PlotPerformanceWrapper params={params} />
-            </ProtectedRoute>
-          )}
-        />
-      </Router>
-    </UserProvider>
+      ))}
+    </Router>
   );
 }
