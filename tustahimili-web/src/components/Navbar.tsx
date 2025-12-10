@@ -19,8 +19,8 @@ export default function Navbar() {
           <Link href="/features" className="text-gray-700 hover:text-blue-600 font-medium">Features</Link>
           <Link href="/about" className="text-gray-700 hover:text-blue-600 font-medium">About</Link>
 
-          <Link href="/get-started" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Get Started</Link>
-          <Link href="/login" className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition">Login</Link>
+          <Link href="/auth" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Get Started</Link>
+          <Link href="/auth" className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition">Login</Link>
         </div>
 
         {/* Mobile Hamburger */}
@@ -41,7 +41,7 @@ export default function Navbar() {
             <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium" onClick={() => setIsOpen(false)}>Home</Link>
             <Link href="/features" className="text-gray-700 hover:text-blue-600 font-medium" onClick={() => setIsOpen(false)}>Features</Link>
             <Link href="/about" className="text-gray-700 hover:text-blue-600 font-medium" onClick={() => setIsOpen(false)}>About</Link>
-            <Link href="/get-started" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-center" onClick={() => setIsOpen(false)}>Get Started</Link>
+            <Link href="/auth" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-center" onClick={() => setIsOpen(false)}>Get Started</Link>
             <Link href="/login" className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition text-center" onClick={() => setIsOpen(false)}>Login</Link>
           </div>
         </div>

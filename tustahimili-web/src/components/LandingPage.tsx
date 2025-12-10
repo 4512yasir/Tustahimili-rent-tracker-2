@@ -20,7 +20,7 @@ export default function LandingPage() {
             </p>
             <div className="flex gap-4">
               <a
-                href="/get-started"
+                href="/auth"
                 className="bg-yellow-400 text-blue-900 font-semibold px-6 py-3 rounded-lg hover:bg-yellow-500 transition"
               >
                 Get Started

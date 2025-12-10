@@ -4,12 +4,12 @@ import type { Role } from "./type";
 
 // Public Pages
 import LandingPage from "./components/LandingPage";
-import RegisterPage from "./components/registerpage";
-import LoginPage from "./components/LoginPage";
 import FeaturesPage from "./components/faeturepage";
 import AboutPage from "./components/AboutPage";
+import LoginPage from "./components/LoginPage";
+import RegisterPage from "./components/authpage";
 
-// Layout & Auth
+// Dashboard Layout & Protected Route
 import DashboardLayout from "./components/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -20,22 +20,14 @@ import PlotPerformance from "./plots/PlotPerformance";
 import TenantPage from "./Tenants/TenantPage";
 import RentTracking from "./Rent/Renttracking";
 import RepairPage from "./Repair/RepairPage";
+import AnalyticsPage from "./components/analytic";
+import SecurityPage from "./components/security";
 
 /* ---------------- DASHBOARD WRAPPERS ---------------- */
 
 interface DashboardWrapperProps {
   content?: React.ReactNode;
 }
-
-
-
-/* ---------------- WRAPPERS ---------------- */
-
-const RepairWrapper: React.FC = () => {
-  const { user } = useUser();
-  if (!user) return null;
-  return <DashboardLayout role={user.role as Role} content={<RepairPage />} />;
-};
 
 const DashboardWrapper: React.FC<DashboardWrapperProps> = ({ content }) => {
   const { user } = useUser();
@@ -63,20 +55,38 @@ const RentTrackingWrapper: React.FC = () => {
   return <DashboardLayout role={user.role as Role} content={<RentTracking />} />;
 };
 
+const RepairWrapper: React.FC = () => {
+  const { user } = useUser();
+  if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={<RepairPage />} />;
+};
+
 const PlotPerformanceWrapper: React.FC = () => {
   const { user } = useUser();
   if (!user) return null;
   return <DashboardLayout role={user.role as Role} content={<PlotPerformance role={user.role as Role} />} />;
 };
 
-/* ---------------- ROUTES ---------------- */
+const AnalyticsWrapper: React.FC = () => {
+  const { user } = useUser();
+  if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={<AnalyticsPage />} />;
+};
+
+const SecurityWrapper: React.FC = () => {
+  const { user } = useUser();
+  if (!user) return null;
+  return <DashboardLayout role={user.role as Role} content={<SecurityPage />} />;
+};
+
+/* ---------------- APP ROUTES ---------------- */
 
 export default function App() {
   return (
     <Router>
       {/* ---------- PUBLIC ROUTES ---------- */}
       <Route path="/" component={LandingPage} />
-      <Route path="/get-started" component={RegisterPage} />
+      <Route path="/auth" component={RegisterPage} />
       <Route path="/features" component={FeaturesPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/login" component={LoginPage} />
@@ -87,14 +97,6 @@ export default function App() {
         component={() => (
           <ProtectedRoute>
             <DashboardWrapper />
-          </ProtectedRoute>
-        )}
-      />
-      <Route
-        path="/tenants"
-        component={() => (
-          <ProtectedRoute>
-            <TenantsWrapper />
           </ProtectedRoute>
         )}
       />
@@ -115,6 +117,14 @@ export default function App() {
         )}
       />
       <Route
+        path="/tenants"
+        component={() => (
+          <ProtectedRoute>
+            <TenantsWrapper />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
         path="/rent-tracking"
         component={() => (
           <ProtectedRoute>
@@ -122,8 +132,7 @@ export default function App() {
           </ProtectedRoute>
         )}
       />
-
-       <Route
+      <Route
         path="/repairs"
         component={() => (
           <ProtectedRoute>
@@ -131,19 +140,22 @@ export default function App() {
           </ProtectedRoute>
         )}
       />
-
-      {/* ---------- COMING SOON ---------- */}
-      {["/repairs", "/analytics", "/security"].map((path) => (
-        <Route
-          key={path}
-          path={path}
-          component={() => (
-            <ProtectedRoute>
-              <DashboardWrapper />
-            </ProtectedRoute>
-          )}
-        />
-      ))}
+      <Route
+        path="/analytics"
+        component={() => (
+          <ProtectedRoute>
+            <AnalyticsWrapper />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/security"
+        component={() => (
+          <ProtectedRoute>
+            <SecurityWrapper />
+          </ProtectedRoute>
+        )}
+      />
     </Router>
   );
 }
